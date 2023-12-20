@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Transcriber</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Audio Transcriber</h1>
+    <button id="recordButton">Record</button>
+    <textarea id="memoBox" rows="10" cols="50"></textarea>
+
+    <script>
+        let isRecording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+
+        document.getElementById("recordButton").addEventListener("click", function(){
+            if (!isRecording) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+
+                        mediaRecorder.addEventListener("dataavailable", event => {
+                            audioChunks.push(event.data);
+                        });
+
+                        mediaRecorder.addEventListener("stop", () => {
+                            const audioBlob = new Blob(audioChunks);
+                            sendDataToServer(audioBlob);
+                            audioChunks = [];
+                        });
+
+                        this.textContent = 'Stop';
+                        isRecording = true;
+                    });
+            } else {
+                mediaRecorder.stop();
+                this.textContent = 'Record';
+                isRecording = false;
+            }
+        });
+
+        function sendDataToServer(blob) {
+            let formData = new FormData();
+            formData.append("audio_data", blob);
+
+            $.ajax({
+                type: "POST",
+                url: "/upload",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    document.getElementById("memoBox").value = response.transcription;
+                },
+                error: function() {
+                    alert("Error in sending data to server.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
