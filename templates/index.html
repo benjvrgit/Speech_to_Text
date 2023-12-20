@@ -37,6 +37,8 @@
 
             $("#recordButton").click(function() {
                 if (!isRecording) {
+                    // Clear the memoBox when recording starts
+                    $("#memoBox").val('');
                     navigator.mediaDevices.getUserMedia({ audio: true })
                         .then(stream => {
                             mediaRecorder = new MediaRecorder(stream);
