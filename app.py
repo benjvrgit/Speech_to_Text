@@ -4,9 +4,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-#import speech_recognition as sr
 from openai import OpenAI
-client = OpenAI()
+mykey = os.environ['OPENAI_API_KEY']
+client = OpenAI(api_key=mykey)
 
 
 app = Flask(__name__)
@@ -47,4 +47,7 @@ def upload():
     return jsonify({'transcription': ''})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(host='0.0.0.0', port=80)
+    #app.run(host='0.0.0.0', port=8080)
+    #app.run(debug=True)
+    app.run()
